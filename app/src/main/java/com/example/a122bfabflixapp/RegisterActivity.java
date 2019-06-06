@@ -1,0 +1,136 @@
+package com.example.a122bfabflixapp;
+
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.jar.JarException;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private String registerSuccess = "Successfully registered. Please Login.";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        configureRegisterButton();
+
+    }
+
+    public void configureRegisterButton() {
+        Button registerButton = (Button) findViewById(R.id.RegisterButton);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                System.out.println("Clicked Register Button");
+                HTTPrequestRegister();
+//                Toast.makeText(getApplicationContext(),registerSuccess, Toast.LENGTH_LONG).show();
+//                finish();
+
+            }
+        });
+
+    }
+
+    public void HTTPrequestRegister(){
+        try{
+            RequestQueue requestQueue = Volley.newRequestQueue(this);
+            String URL = "http://10.0.2.2:3979/api/idm/register";
+            final JSONObject jsonBody = new JSONObject();
+            TextView email = (TextView) findViewById(R.id.RegisterEmail);
+            String UserEmail = email.getText().toString();
+            TextView pass = (TextView) findViewById(R.id.RegisterPass);
+            System.out.println(pass.getText());
+
+            //char[] Password = pass.getText().toString().toCharArray();
+            jsonBody.accumulate("email", UserEmail);
+            jsonBody.accumulate("password",pass.getText());
+//            jsonBody.put("email", UserEmail);
+//            jsonBody.put("password",Password);
+            final String jsonString = jsonBody.toString();
+
+            System.out.println(jsonBody.toString());
+
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL,jsonBody, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    System.out.println("VOLLEY "+  response);
+                    try{
+                        if (response.getInt("resultCode") == 110) {
+                                Toast.makeText(getApplicationContext(),response.getString("message")+ "Please login.", Toast.LENGTH_LONG).show();
+                                finish();
+                        }
+                        else
+                            Toast.makeText(getApplicationContext(),response.getString("message"), Toast.LENGTH_LONG).show();
+                    }
+                    catch(JSONException e){
+                        System.out.println("Error getting data from 200 response");
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    String body;
+                    JSONObject jsonObject;
+                    //get status code here
+                    String statusCode = String.valueOf(error.networkResponse.statusCode);
+                    //get response body and parse with appropriate encoding
+                    System.out.println(statusCode);
+                    if(error.networkResponse.data!=null) {
+                        try {
+                            body = new String(error.networkResponse.data,"UTF-8");
+                            System.out.println("this is the body: " +body);
+
+                            try {
+                                jsonObject = new JSONObject(body);
+                                switch(jsonObject.getInt("resultCode")){
+                                    case -12:
+                                    case -11:
+                                    case -10:
+                                        Toast.makeText(getApplicationContext(),jsonObject.getString("message"), Toast.LENGTH_LONG).show();
+                                        break;
+                                    default:
+                                        Toast.makeText(getApplicationContext(),"Bad Input. Please try again.", Toast.LENGTH_LONG).show();
+                                        break;
+                                }
+                            }catch (JSONException err){
+                                System.out.println("Error " + err.toString());
+                            }
+
+                        } catch (UnsupportedEncodingException e) {
+                            System.out.println("there was a body error ");
+                            e.printStackTrace();
+                        }
+                    System.out.println("VOLLEY " +  error.toString());
+                    }
+                }
+            });
+
+            requestQueue.add(jsonObjectRequest);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
