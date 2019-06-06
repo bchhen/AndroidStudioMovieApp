@@ -22,8 +22,7 @@ import java.io.UnsupportedEncodingException;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String sessionID;
-    public static String gemail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,9 +81,14 @@ public class MainActivity extends AppCompatActivity {
                     try{
                         if (response.getInt("resultCode") == 120) {
                             Toast.makeText(getApplicationContext(),response.getString("message"), Toast.LENGTH_LONG).show();
-                            gemail = UserEmail;
-                            sessionID = response.getString("sessionID");
-                            startActivity(new Intent(MainActivity.this, SearchActivity.class));
+                            Intent goToSearch = new Intent(MainActivity.this,SearchActivity.class);
+                            goToSearch.putExtra("EMAIL",UserEmail);
+                            goToSearch.putExtra("SESSIONID",response.getString("sessionID"));
+                            System.out.println("Im finishing");
+                            finish();
+                            System.out.println("Starting Search");
+
+                            startActivity(goToSearch);
 
                         }
                         else

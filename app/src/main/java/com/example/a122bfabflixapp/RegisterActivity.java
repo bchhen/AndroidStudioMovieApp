@@ -67,7 +67,6 @@ public class RegisterActivity extends AppCompatActivity {
             jsonBody.accumulate("password",pass.getText());
 //            jsonBody.put("email", UserEmail);
 //            jsonBody.put("password",Password);
-            final String jsonString = jsonBody.toString();
 
             System.out.println(jsonBody.toString());
 

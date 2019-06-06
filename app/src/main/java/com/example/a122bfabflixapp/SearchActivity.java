@@ -33,11 +33,16 @@ public class SearchActivity extends AppCompatActivity {
 
     //private JSONArray movies;
     private ArrayList<JSONObject> movies;
+    private String sessionID;
+    private String gemail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        Intent searchIntent = getIntent();
+        sessionID = searchIntent.getStringExtra("SESSIONID");
+        gemail = searchIntent.getStringExtra("EMAIL");
 
         configureSearchButton();
     }
@@ -128,6 +133,8 @@ public class SearchActivity extends AppCompatActivity {
                                 @Override
                                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                                     Intent movieDetail = new Intent(SearchActivity.this, MovieDetailActivity.class);
+                                    movieDetail.putExtra("EMAIL",gemail);
+                                    movieDetail.putExtra("SESSIONID",sessionID);
                                     try {
                                         movieDetail.putExtra("MOVIEID", movies.get(i).getString("movieId"));
                                     }catch (JSONException err){
@@ -183,8 +190,8 @@ public class SearchActivity extends AppCompatActivity {
                         public Map<String, String> getHeaders() throws AuthFailureError {
                             Map<String, String>  params = new HashMap<String, String>();
                             TextView temp = (TextView) findViewById(R.id.LoginEmail);
-                            params.put("email", MainActivity.gemail);
-                            params.put("sessionID", MainActivity.sessionID);
+                            params.put("email", gemail);
+                            params.put("sessionID", sessionID);
 
                             return params;
                         }
