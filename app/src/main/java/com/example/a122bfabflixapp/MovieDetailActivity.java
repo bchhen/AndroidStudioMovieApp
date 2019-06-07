@@ -21,6 +21,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,6 +84,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                         if (response.getInt("resultCode") == 210) {
                             Toast.makeText(getApplicationContext(),response.getString("message"), Toast.LENGTH_LONG).show();
                             System.out.println(response);
+                            fillImage(response.getJSONObject("movie"));
                             fillGeneral(response.getJSONObject("movie"));
                             fillGenres(response.getJSONObject("movie").getJSONArray("genres"));
                             fillStars(response.getJSONObject("movie").getJSONArray("stars"));
@@ -146,33 +148,36 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
+    public void fillImage(JSONObject jsonObject){
+        try{
+            ImageView imageView = (ImageView) findViewById(R.id.MDposterPath);
+            Uri absPathUri= Uri.parse("https://image.tmdb.org/t/p/w500"+jsonObject.getString("poster_path"));
+            Picasso.get().load(absPathUri).into(imageView);
+        }
+        catch (Exception e){
+            System.out.println("Error loading image");
+        }
+    }
+
     public void fillGeneral(JSONObject jsonObject){
         try{
-
-//            ImageView imageView = (ImageView) findViewById(R.id.MDposterPath);
-//
-//            Uri absPathUri= Uri.parse("https://image.tmdb.org/t/p/w500"+jsonObject.getString("poster_path"));
-//
-//            Bitmap myImg = BitmapFactory.decodeStream(absPathUri.)PathUri.getPath());
-//
-//            //  https://image.tmdb.org/t/p/w500/kqjL17yufvn9OVLyXYpvtyrFfak.jpg
-//            URI imgUri= URI.create("https://image.tmdb.org/t/p/w500"+jsonObject.getString("poster_path"));
-//
-////            URL url =  imgUri.toURL();
-////            Bitmap bitmap = BitmapFactory.decodeStream(url.openStream());
-////            imageView.setImageURI(null);
-//            imageView.setImageBitmap(myImg);
-//            imageView.invalidate();
-//
-//            //imageView.setImageURI(imgUri);
             TextView movieTitle = (TextView) findViewById(R.id.MDmovieTitle);
             movieTitle.setText(jsonObject.getString("title"));
+
             TextView overview = (TextView) findViewById(R.id.MDoverview);
-            overview.setText(jsonObject.getString("overview"));
+            if (!jsonObject.isNull("overview"))
+                overview.setText(jsonObject.getString("overview"));
+
+
             TextView director = (TextView) findViewById(R.id.MDdirector);
-            director.setText(jsonObject.getString("director"));
+            if (!jsonObject.isNull("director"))
+                director.setText(jsonObject.getString("director"));
+
+
             TextView year = (TextView) findViewById(R.id.MDyear);
-            year.setText(jsonObject.get("year").toString());
+            if (!jsonObject.isNull("year"))
+                year.setText(jsonObject.get("year").toString());
+
             TextView rating = (TextView) findViewById(R.id.MDrating);
             rating.setText(jsonObject.get("rating").toString());
             TextView votes = (TextView) findViewById(R.id.MDvotes);
@@ -182,11 +187,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         catch (JSONException e){
             System.out.println("Error getting values from fill general");
         }
-//        catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+
     }
 
     public void fillGenres(JSONArray jsonArray){
